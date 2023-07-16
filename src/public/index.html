@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Password Manager</title>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <style>
+    *{
+      color: #494386;
+    }
+    form{
+      margin: 10px;
+    }
+    label{
+      padding: 5px 5px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      padding: 8px 8px;
+      margin: 6px 0;
+      border-radius: 5px;
+      box-sizing: border-box;
+      border: solid 1px #968df8;
+      -webkit-transition: 0.01s;
+      transition: 0.01s;
+      outline: none;
+    }
+    input:focus{
+      border: 2px solid #2112c5;
+    }
+    button{
+      background-color: #756af4; 
+      border: none;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 5px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button:active {
+      background-color: #756af477; 
+      box-shadow: 0 0 0 white;
+      outline: none;
+      -webkit-box-shadow: inset 0px 0px 5px #c1c1c1;
+      -moz-box-shadow: inset 0px 0px 5px #c1c1c1;
+      box-shadow: inset 0px 0px 5px #c1c1c1;
+    }
+    #generatedPassword{
+      font-weight: 700;
+    }
+    .password-generator{
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  </style>
+</head>
+<body>
+  <div class="password-generator">
+      <h1>Password Manager</h1>
+      <h2>Generate a Password</h2>
+      <form id="generateForm">
+        <label for="length">Length:</label>
+        <input type="number" id="length" name="length" min="6" max="32" value="12" required>
+        <button type="submit">Generate</button>
+      </form>
+      <p id="generatedPassword"></p>
+
+      <h2>Store a Password</h2>
+      <form id="storeForm">
+        <label for="account">Account:</label>
+        <input type="text" id="account" name="account" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <button type="submit">Store</button>
+      </form>
+      <p id="storeMessage"></p>
+
+      <h2>Retrieve a Password</h2>
+      <form id="retrieveForm">
+        <label for="retrieveAccount">Account:</label>
+        <input type="text" id="retrieveAccount" name="retrieveAccount" required>
+        <button type="submit">Retrieve</button>
+      </form>
+      <p id="retrievedPassword"></p>
+</div>
+
+  <script>
+    const generateForm = document.getElementById('generateForm');
+    const generatedPassword = document.getElementById('generatedPassword');
+    const storeForm = document.getElementById('storeForm');
+    const storeMessage = document.getElementById('storeMessage');
+    const retrieveForm = document.getElementById('retrieveForm');
+    const retrievedPassword = document.getElementById('retrievedPassword');
+
+    generateForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const length = document.getElementById('length').value;
+      axios.get(`/generate?length=${length}`)
+        .then((response) => {
+          generatedPassword.textContent = `Generated Password: ${response.data.password}`;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    });
+
+    storeForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const account = document.getElementById('account').value;
+      const password = document.getElementById('password').value;
+      axios.post('/store', { account, password })
+        .then((response) => {
+          storeMessage.textContent = response.data.message;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    });
+
+    retrieveForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const retrieveAccount = document.getElementById('retrieveAccount').value;
+      axios.get(`/retrieve/${retrieveAccount}`)
+        .then((response) => {
+          retrievedPassword.textContent = `Retrieved Password: ${response.data.password}`;
+        })
+        .catch((error) => {
+          retrievedPassword.textContent = `Error: ${error.response.data.error}`;
+        });
+    });
+  </script>
+</body>
+</html>
